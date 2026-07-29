@@ -1,5 +1,11 @@
 import { Component, computed, signal } from '@angular/core';
 import {
+  applySanSequence,
+  Coord,
+  GameState,
+  oppositeColor,
+} from '../chess/san';
+import {
   Board,
   ChessPiece,
   FILES,
@@ -26,6 +32,8 @@ export class ChessboardComponent {
   readonly pieceTypes = PIECE_TYPES;
 
   readonly board = signal<Board>(createStartingBoard());
+  readonly sideToMove = signal<PieceColor>('white');
+  readonly enPassant = signal<Coord | null>(null);
   readonly mode = signal<InteractionMode>('move');
   readonly selectedSquare = signal<{ row: number; col: number } | null>(null);
   readonly selectedPalettePiece = signal<ChessPiece>({
@@ -33,6 +41,9 @@ export class ChessboardComponent {
     color: 'white',
   });
   readonly dragFrom = signal<{ row: number; col: number } | null>(null);
+  readonly notationText = signal('');
+  readonly notationMessage = signal<string | null>(null);
+  readonly notationError = signal(false);
 
   readonly modeLabel = computed(() => {
     switch (this.mode()) {
@@ -161,12 +172,69 @@ export class ChessboardComponent {
 
   resetBoard(): void {
     this.board.set(createStartingBoard());
+    this.sideToMove.set('white');
+    this.enPassant.set(null);
     this.selectedSquare.set(null);
+    this.notationMessage.set(null);
+    this.notationError.set(false);
   }
 
   clearBoard(): void {
     this.board.set(createEmptyBoard());
+    this.sideToMove.set('white');
+    this.enPassant.set(null);
     this.selectedSquare.set(null);
+    this.notationMessage.set(null);
+    this.notationError.set(false);
+  }
+
+  onNotationInput(event: Event): void {
+    const value = (event.target as HTMLTextAreaElement).value;
+    this.notationText.set(value);
+  }
+
+  toggleSideToMove(): void {
+    this.sideToMove.update((side) => oppositeColor(side));
+    this.enPassant.set(null);
+  }
+
+  applyNotation(): void {
+    const text = this.notationText().trim();
+    if (!text) {
+      this.notationError.set(true);
+      this.notationMessage.set('Enter one or more moves in algebraic notation.');
+      return;
+    }
+
+    const result = applySanSequence(this.gameState(), text);
+    this.applyGameState(result.state);
+    this.selectedSquare.set(null);
+
+    if (result.error) {
+      this.notationError.set(true);
+      this.notationMessage.set(result.error);
+      return;
+    }
+
+    this.notationError.set(false);
+    this.notationMessage.set(
+      `Played ${result.applied.length} move${result.applied.length === 1 ? '' : 's'}: ${result.applied.join(' ')}`
+    );
+    this.notationText.set('');
+  }
+
+  private gameState(): GameState {
+    return {
+      board: this.board(),
+      sideToMove: this.sideToMove(),
+      enPassant: this.enPassant(),
+    };
+  }
+
+  private applyGameState(state: GameState): void {
+    this.board.set(state.board);
+    this.sideToMove.set(state.sideToMove);
+    this.enPassant.set(state.enPassant);
   }
 
   private movePiece(
@@ -181,6 +249,7 @@ export class ChessboardComponent {
       next[fromRow][fromCol] = null;
       return next;
     });
+    this.enPassant.set(null);
   }
 
   private placePiece(row: number, col: number, piece: ChessPiece): void {

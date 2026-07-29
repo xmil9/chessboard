@@ -101,6 +101,42 @@
     }
   </div>
 
+  <section class="notation" aria-label="Algebraic notation">
+    <div class="notation-header">
+      <h2>Algebraic notation</h2>
+      <button
+        type="button"
+        class="secondary side-toggle"
+        (click)="toggleSideToMove()"
+        [attr.aria-label]="'Side to move: ' + sideToMove() + '. Click to switch.'"
+      >
+        Side to move: {{ sideToMove() }}
+      </button>
+    </div>
+    <p class="notation-hint">
+      Enter one or more SAN moves, e.g.
+      <code>e4 e5 Nf3 Nc6</code> or <code>1. e4 e5 2. Nf3 Nc6 3. Bb5 a6</code>
+    </p>
+    <textarea
+      rows="3"
+      [value]="notationText()"
+      (input)="onNotationInput($event)"
+      (keydown.control.enter)="applyNotation()"
+      placeholder="e4 e5 Nf3 Nc6 Bb5 a6"
+      aria-label="Moves in algebraic chess notation"
+    ></textarea>
+    <div class="notation-actions">
+      <button type="button" (click)="applyNotation()">Play moves</button>
+      <span
+        class="notation-message"
+        [class.error]="notationError()"
+        role="status"
+      >
+        {{ notationMessage() }}
+      </span>
+    </div>
+  </section>
+
   <section class="palette" aria-label="Piece palette">
     <h2>Pieces</h2>
     <div class="palette-rows">
