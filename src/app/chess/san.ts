@@ -209,7 +209,7 @@ export function applySanMove(
   return executeMove(state, candidates[0], parsed.to, parsed.promotion);
 }
 
-function cloneGameState(state: GameState): GameState {
+export function cloneGameState(state: GameState): GameState {
   return {
     board: cloneBoard(state.board),
     sideToMove: state.sideToMove,

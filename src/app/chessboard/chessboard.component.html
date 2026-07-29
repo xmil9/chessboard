@@ -135,6 +135,28 @@
         {{ notationMessage() }}
       </span>
     </div>
+
+    <div class="history-nav" role="group" aria-label="SAN move navigation">
+      <button
+        type="button"
+        class="secondary"
+        [disabled]="!canGoBack()"
+        (click)="goBack()"
+        aria-label="Previous SAN move"
+      >
+        ← Back
+      </button>
+      <span class="history-label" aria-live="polite">{{ historyLabel() }}</span>
+      <button
+        type="button"
+        class="secondary"
+        [disabled]="!canGoForward()"
+        (click)="goForward()"
+        aria-label="Next SAN move"
+      >
+        Forward →
+      </button>
+    </div>
   </section>
 
   <section class="palette" aria-label="Piece palette">

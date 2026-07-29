@@ -22,6 +22,8 @@ O-O Nf6
 
 Supports castling (`O-O` / `O-O-O`), captures, promotions (`e8=Q`), and disambiguation (`Nbd7`, `R1a3`). Moves are applied for the current side to move (toggleable). If a move in a sequence fails, earlier moves in that sequence are still kept.
 
+Use **← Back** / **Forward →** to step through played SAN moves. Manual board edits clear that history.
+
 ## Development
 
 ```bash

@@ -1,6 +1,8 @@
 import { Component, computed, signal } from '@angular/core';
 import {
+  applySanMove,
   applySanSequence,
+  cloneGameState,
   Coord,
   GameState,
   oppositeColor,
@@ -44,6 +46,33 @@ export class ChessboardComponent {
   readonly notationText = signal('');
   readonly notationMessage = signal<string | null>(null);
   readonly notationError = signal(false);
+
+  /** Snapshot after each ply; index 0 is the line's starting position. */
+  readonly historyStates = signal<GameState[]>([
+    {
+      board: createStartingBoard(),
+      sideToMove: 'white',
+      enPassant: null,
+    },
+  ]);
+  readonly historyMoves = signal<string[]>([]);
+  readonly historyIndex = signal(0);
+
+  readonly canGoBack = computed(() => this.historyIndex() > 0);
+  readonly canGoForward = computed(
+    () => this.historyIndex() < this.historyMoves().length
+  );
+  readonly historyLabel = computed(() => {
+    const moves = this.historyMoves();
+    if (moves.length === 0) {
+      return 'No SAN moves yet';
+    }
+    const index = this.historyIndex();
+    if (index === 0) {
+      return `Start · 0/${moves.length}`;
+    }
+    return `${moves[index - 1]} · ${index}/${moves.length}`;
+  });
 
   readonly modeLabel = computed(() => {
     switch (this.mode()) {
@@ -177,6 +206,7 @@ export class ChessboardComponent {
     this.selectedSquare.set(null);
     this.notationMessage.set(null);
     this.notationError.set(false);
+    this.resetHistory(this.gameState());
   }
 
   clearBoard(): void {
@@ -186,6 +216,7 @@ export class ChessboardComponent {
     this.selectedSquare.set(null);
     this.notationMessage.set(null);
     this.notationError.set(false);
+    this.resetHistory(this.gameState());
   }
 
   onNotationInput(event: Event): void {
@@ -196,6 +227,7 @@ export class ChessboardComponent {
   toggleSideToMove(): void {
     this.sideToMove.update((side) => oppositeColor(side));
     this.enPassant.set(null);
+    this.resetHistory(this.gameState());
   }
 
   applyNotation(): void {
@@ -206,9 +238,14 @@ export class ChessboardComponent {
       return;
     }
 
-    const result = applySanSequence(this.gameState(), text);
+    const before = this.gameState();
+    const result = applySanSequence(before, text);
     this.applyGameState(result.state);
     this.selectedSquare.set(null);
+
+    if (result.applied.length > 0) {
+      this.appendHistoryMoves(before, result.applied);
+    }
 
     if (result.error) {
       this.notationError.set(true);
@@ -221,6 +258,66 @@ export class ChessboardComponent {
       `Played ${result.applied.length} move${result.applied.length === 1 ? '' : 's'}: ${result.applied.join(' ')}`
     );
     this.notationText.set('');
+  }
+
+  goBack(): void {
+    if (!this.canGoBack()) {
+      return;
+    }
+    const index = this.historyIndex() - 1;
+    this.historyIndex.set(index);
+    this.applyGameState(cloneGameState(this.historyStates()[index]));
+    this.selectedSquare.set(null);
+    this.notationError.set(false);
+    this.notationMessage.set(this.historyLabel());
+  }
+
+  goForward(): void {
+    if (!this.canGoForward()) {
+      return;
+    }
+    const index = this.historyIndex() + 1;
+    this.historyIndex.set(index);
+    this.applyGameState(cloneGameState(this.historyStates()[index]));
+    this.selectedSquare.set(null);
+    this.notationError.set(false);
+    this.notationMessage.set(this.historyLabel());
+  }
+
+  private appendHistoryMoves(before: GameState, moves: string[]): void {
+    const index = this.historyIndex();
+    const states = this.historyStates()
+      .slice(0, index + 1)
+      .map((state) => cloneGameState(state));
+    const historyMoves = this.historyMoves().slice(0, index);
+
+    // Ensure the current ply matches the position we played from.
+    states[states.length - 1] = cloneGameState(before);
+
+    let current = cloneGameState(before);
+    for (const move of moves) {
+      const next = applySanMove(current, move);
+      if ('error' in next) {
+        break;
+      }
+      current = next;
+      states.push(cloneGameState(current));
+      historyMoves.push(move);
+    }
+
+    this.historyStates.set(states);
+    this.historyMoves.set(historyMoves);
+    this.historyIndex.set(historyMoves.length);
+  }
+
+  private resetHistory(state: GameState): void {
+    this.historyStates.set([cloneGameState(state)]);
+    this.historyMoves.set([]);
+    this.historyIndex.set(0);
+  }
+
+  private invalidateHistory(): void {
+    this.resetHistory(this.gameState());
   }
 
   private gameState(): GameState {
@@ -250,6 +347,7 @@ export class ChessboardComponent {
       return next;
     });
     this.enPassant.set(null);
+    this.invalidateHistory();
   }
 
   private placePiece(row: number, col: number, piece: ChessPiece): void {
@@ -258,6 +356,7 @@ export class ChessboardComponent {
       next[row][col] = { ...piece };
       return next;
     });
+    this.invalidateHistory();
   }
 
   private removePiece(row: number, col: number): void {
@@ -270,6 +369,7 @@ export class ChessboardComponent {
       next[row][col] = null;
       return next;
     });
+    this.invalidateHistory();
   }
 
   paletteSymbol(type: PieceType, color: PieceColor): string {
