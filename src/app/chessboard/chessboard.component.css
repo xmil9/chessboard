@@ -1,0 +1,265 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  color: #1f2933;
+  background:
+    radial-gradient(circle at top left, rgba(196, 149, 74, 0.18), transparent 40%),
+    radial-gradient(circle at bottom right, rgba(59, 91, 74, 0.16), transparent 45%),
+    #f4efe6;
+  font-family: "Segoe UI", "Trebuchet MS", sans-serif;
+}
+
+.workspace {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 2.5rem;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.hint {
+  margin: 0.4rem 0 0;
+  color: #52606d;
+  font-size: 0.95rem;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+  margin: 1.25rem 0 1rem;
+}
+
+.modes,
+.actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+button {
+  appearance: none;
+  border: 1px solid #9aa5b1;
+  background: #fff;
+  color: inherit;
+  border-radius: 0.5rem;
+  padding: 0.45rem 0.85rem;
+  font: inherit;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+
+button:hover {
+  background: #f5f7fa;
+}
+
+button:active {
+  transform: translateY(1px);
+}
+
+button.active {
+  background: #3b5b4a;
+  border-color: #3b5b4a;
+  color: #fff;
+}
+
+button.secondary {
+  background: transparent;
+}
+
+.board-area {
+  display: grid;
+  grid-template-columns: 1.5rem 1fr;
+  gap: 0.35rem;
+  align-items: stretch;
+}
+
+.rank-labels {
+  display: grid;
+  grid-template-rows: repeat(8, 1fr);
+  font-size: 0.85rem;
+  color: #616e7c;
+  text-align: center;
+}
+
+.rank-labels span,
+.file-labels span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.board {
+  display: grid;
+  grid-template-rows: repeat(8, 1fr);
+  aspect-ratio: 1;
+  width: 100%;
+  max-width: 560px;
+  border: 3px solid #3e4c59;
+  border-radius: 0.35rem;
+  overflow: hidden;
+  box-shadow: 0 12px 30px rgba(62, 76, 89, 0.18);
+}
+
+.rank {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+}
+
+.square {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  aspect-ratio: 1;
+  min-height: 0;
+  cursor: pointer;
+}
+
+.square.light {
+  background: #f0d9b5;
+}
+
+.square.dark {
+  background: #b58863;
+}
+
+.square.selected {
+  outline: 3px solid #f7c948;
+  outline-offset: -3px;
+  z-index: 1;
+}
+
+.board.add-mode .square:hover,
+.board.remove-mode .square:hover {
+  filter: brightness(1.08);
+}
+
+.piece {
+  font-size: clamp(1.6rem, 6vw, 3rem);
+  line-height: 1;
+  user-select: none;
+  cursor: grab;
+}
+
+.piece:active {
+  cursor: grabbing;
+}
+
+.piece.white {
+  color: #f7f7f7;
+  text-shadow:
+    0 0 1px #1f2933,
+    0 1px 0 #1f2933,
+    1px 0 0 #1f2933,
+    0 -1px 0 #1f2933,
+    -1px 0 0 #1f2933;
+}
+
+.piece.black {
+  color: #1a1a1a;
+}
+
+.file-labels {
+  display: grid;
+  grid-template-columns: 1.5rem repeat(8, 1fr);
+  gap: 0.35rem;
+  margin-top: 0.35rem;
+  max-width: calc(560px + 1.5rem + 0.35rem);
+  font-size: 0.85rem;
+  color: #616e7c;
+}
+
+.file-labels .spacer {
+  visibility: hidden;
+}
+
+.palette {
+  margin-top: 1.5rem;
+  padding: 1rem 1.1rem;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid #d9e2ec;
+  border-radius: 0.75rem;
+}
+
+.palette h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+}
+
+.palette-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.palette-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.palette-label {
+  width: 3.5rem;
+  font-size: 0.9rem;
+  color: #52606d;
+}
+
+.palette-piece {
+  width: 2.75rem;
+  height: 2.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  padding: 0;
+}
+
+.palette-piece.white {
+  color: #f7f7f7;
+  background: #7b8794;
+  text-shadow:
+    0 0 1px #1f2933,
+    0 1px 0 #1f2933,
+    1px 0 0 #1f2933,
+    0 -1px 0 #1f2933,
+    -1px 0 0 #1f2933;
+}
+
+.palette-piece.black {
+  color: #1a1a1a;
+  background: #e4e7eb;
+}
+
+.tip {
+  margin: 0.85rem 0 0;
+  font-size: 0.85rem;
+  color: #616e7c;
+}
+
+@media (max-width: 520px) {
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .modes,
+  .actions {
+    width: 100%;
+  }
+
+  .modes button,
+  .actions button {
+    flex: 1;
+  }
+}
