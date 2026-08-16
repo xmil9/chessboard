@@ -107,6 +107,7 @@ export function parseSan(san: string): ParsedSan | null {
   const raw = san.trim();
   const normalized = raw
     .replace(/[+#?!]+$/g, '')
+    .replace(/[\u2013\u2014]/g, '-')
     .replace(/0-0-0/g, 'O-O-O')
     .replace(/0-0/g, 'O-O');
 

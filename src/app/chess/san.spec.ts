@@ -23,6 +23,11 @@ describe('tokenizeSanMoves', () => {
 describe('parseSan', () => {
   it('parses castling and promotions', () => {
     expect(parseSan('O-O')?.castling).toBe('kingside');
+    expect(parseSan('O–O')?.castling).toBe('kingside');
+    expect(parseSan('O—O')?.castling).toBe('kingside');
+    expect(parseSan('O–O–O')?.castling).toBe('queenside');
+    expect(parseSan('O—O—O')?.castling).toBe('queenside');
+    expect(parseSan('0–0')?.castling).toBe('kingside');
     expect(parseSan('e8=Q')?.promotion).toBe('queen');
     expect(parseSan('Nbd7')?.fromFile).toBe(1);
   });
