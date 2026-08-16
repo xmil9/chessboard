@@ -4,8 +4,12 @@ import {
   applySanSequence,
   cloneGameState,
   Coord,
+  formatCurrentScoresheetRow,
+  formatScoresheet,
+  fullMoveCount,
   GameState,
   oppositeColor,
+  toScoresheetRows,
 } from '../chess/san';
 import {
   Board,
@@ -62,16 +66,23 @@ export class ChessboardComponent {
   readonly canGoForward = computed(
     () => this.historyIndex() < this.historyMoves().length
   );
+  readonly scoresheetRows = computed(() =>
+    toScoresheetRows(this.historyMoves(), this.historyStates()[0].sideToMove)
+  );
   readonly historyLabel = computed(() => {
     const moves = this.historyMoves();
     if (moves.length === 0) {
       return 'No SAN moves yet';
     }
+    const firstSide = this.historyStates()[0].sideToMove;
     const index = this.historyIndex();
+    const total = fullMoveCount(moves.length, firstSide);
     if (index === 0) {
-      return `Start · 0/${moves.length}`;
+      return `Start · 0/${total}`;
     }
-    return `${moves[index - 1]} · ${index}/${moves.length}`;
+    const row = formatCurrentScoresheetRow(moves, index, firstSide);
+    const current = fullMoveCount(index, firstSide);
+    return `${row} · ${current}/${total}`;
   });
 
   readonly modeLabel = computed(() => {
@@ -254,10 +265,22 @@ export class ChessboardComponent {
     }
 
     this.notationError.set(false);
+    const count = fullMoveCount(result.applied.length, before.sideToMove);
     this.notationMessage.set(
-      `Played ${result.applied.length} move${result.applied.length === 1 ? '' : 's'}: ${result.applied.join(' ')}`
+      `Played ${count} move${count === 1 ? '' : 's'}: ${formatScoresheet(
+        result.applied,
+        before.sideToMove
+      )}`
     );
     this.notationText.set('');
+  }
+
+  isCurrentPly(ply: number | null): boolean {
+    return ply !== null && ply === this.historyIndex();
+  }
+
+  isFuturePly(ply: number | null): boolean {
+    return ply !== null && ply > this.historyIndex();
   }
 
   goBack(): void {

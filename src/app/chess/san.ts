@@ -103,6 +103,106 @@ export function tokenizeSanMoves(text: string): string[] {
   return moves;
 }
 
+export interface ScoresheetRow {
+  number: number;
+  white: string | null;
+  whitePly: number | null;
+  black: string | null;
+  blackPly: number | null;
+}
+
+/** Full-move count: one number per white+black pair (an unpaired ply still counts). */
+export function fullMoveCount(
+  plyCount: number,
+  firstSide: PieceColor = 'white'
+): number {
+  if (plyCount <= 0) {
+    return 0;
+  }
+  const offset = firstSide === 'black' ? 1 : 0;
+  return Math.ceil((plyCount + offset) / 2);
+}
+
+export function toScoresheetRows(
+  moves: string[],
+  firstSide: PieceColor = 'white'
+): ScoresheetRow[] {
+  const rows: ScoresheetRow[] = [];
+  let i = 0;
+  let ply = 1;
+  let number = 1;
+
+  if (firstSide === 'black' && moves.length > 0) {
+    rows.push({
+      number: 1,
+      white: null,
+      whitePly: null,
+      black: moves[0],
+      blackPly: 1,
+    });
+    i = 1;
+    ply = 2;
+    number = 2;
+  }
+
+  while (i < moves.length) {
+    const white = moves[i];
+    const black = moves[i + 1] ?? null;
+    rows.push({
+      number,
+      white,
+      whitePly: ply,
+      black,
+      blackPly: black ? ply + 1 : null,
+    });
+    i += 2;
+    ply += black ? 2 : 1;
+    number++;
+  }
+
+  return rows;
+}
+
+/** PGN-style scoresheet text, e.g. `1. e4 e5 2. Nf3 Nc6 3. Bb5`. */
+export function formatScoresheet(
+  moves: string[],
+  firstSide: PieceColor = 'white'
+): string {
+  return toScoresheetRows(moves, firstSide)
+    .map((row) => {
+      if (!row.white && row.black) {
+        return `${row.number}... ${row.black}`;
+      }
+      if (row.black) {
+        return `${row.number}. ${row.white} ${row.black}`;
+      }
+      return `${row.number}. ${row.white}`;
+    })
+    .join(' ');
+}
+
+export function formatCurrentScoresheetRow(
+  moves: string[],
+  plyIndex: number,
+  firstSide: PieceColor = 'white'
+): string {
+  if (plyIndex <= 0) {
+    return '';
+  }
+  const rows = toScoresheetRows(moves.slice(0, plyIndex), firstSide);
+  const row = rows[rows.length - 1];
+  if (!row) {
+    return '';
+  }
+  if (!row.white && row.black) {
+    return `${row.number}... ${row.black}`;
+  }
+  if (row.black) {
+    return `${row.number}. ${row.white} ${row.black}`;
+  }
+  return `${row.number}. ${row.white}`;
+}
+
 export function parseSan(san: string): ParsedSan | null {
   const raw = san.trim();
   const normalized = raw
@@ -174,7 +274,11 @@ export function applySanSequence(
       return {
         state: current,
         applied,
-        error: `Could not play "${token}"${applied.length ? ` after ${applied.join(' ')}` : ''}: ${next.error}`,
+        error: `Could not play "${token}"${
+          applied.length
+            ? ` after ${formatScoresheet(applied, state.sideToMove)}`
+            : ''
+        }: ${next.error}`,
       };
     }
     current = next;

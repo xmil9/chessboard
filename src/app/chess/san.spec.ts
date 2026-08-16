@@ -1,6 +1,10 @@
 import {
   applySanSequence,
+  formatCurrentScoresheetRow,
+  formatScoresheet,
+  fullMoveCount,
   parseSan,
+  toScoresheetRows,
   tokenizeSanMoves,
 } from './san';
 import { createStartingBoard } from '../models/chess.models';
@@ -30,6 +34,44 @@ describe('parseSan', () => {
     expect(parseSan('0–0')?.castling).toBe('kingside');
     expect(parseSan('e8=Q')?.promotion).toBe('queen');
     expect(parseSan('Nbd7')?.fromFile).toBe(1);
+  });
+});
+
+describe('scoresheet formatting', () => {
+  it('pairs white and black into numbered full moves', () => {
+    expect(formatScoresheet(['e4', 'e5', 'Nf3', 'Nc6', 'Bb5'])).toBe(
+      '1. e4 e5 2. Nf3 Nc6 3. Bb5'
+    );
+    expect(fullMoveCount(5)).toBe(3);
+    expect(fullMoveCount(6)).toBe(3);
+    expect(formatCurrentScoresheetRow(['e4', 'e5', 'Nf3', 'Nc6'], 3)).toBe(
+      '2. Nf3'
+    );
+    expect(formatCurrentScoresheetRow(['e4', 'e5', 'Nf3', 'Nc6'], 4)).toBe(
+      '2. Nf3 Nc6'
+    );
+  });
+
+  it('uses ellipsis when the line starts with black', () => {
+    expect(formatScoresheet(['e5', 'Nf3', 'Nc6'], 'black')).toBe(
+      '1... e5 2. Nf3 Nc6'
+    );
+    expect(toScoresheetRows(['e5', 'Nf3'], 'black')).toEqual([
+      {
+        number: 1,
+        white: null,
+        whitePly: null,
+        black: 'e5',
+        blackPly: 1,
+      },
+      {
+        number: 2,
+        white: 'Nf3',
+        whitePly: 2,
+        black: null,
+        blackPly: null,
+      },
+    ]);
   });
 });
 

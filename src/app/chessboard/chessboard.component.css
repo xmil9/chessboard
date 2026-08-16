@@ -285,6 +285,52 @@ button.secondary {
   color: #3e4c59;
 }
 
+.scoresheet {
+  list-style: none;
+  margin: 0.85rem 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11.5rem, 1fr));
+  gap: 0.2rem 1rem;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 0.9rem;
+  color: #3e4c59;
+}
+
+.scoresheet li {
+  display: grid;
+  grid-template-columns: 2.1rem minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0.3rem;
+  align-items: baseline;
+}
+
+.move-num {
+  color: #7b8794;
+  text-align: right;
+}
+
+.ply {
+  min-height: 1.2em;
+  padding: 0 0.15rem;
+  border-radius: 0.2rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ply.empty {
+  color: #9aa5b1;
+}
+
+.ply.current {
+  background: #f7c948;
+  color: #1f2933;
+}
+
+.ply.future {
+  opacity: 0.4;
+}
+
 .palette-rows {
   display: flex;
   flex-direction: column;

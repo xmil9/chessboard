@@ -157,6 +157,32 @@
         Forward →
       </button>
     </div>
+
+    @if (scoresheetRows().length > 0) {
+      <ol class="scoresheet" aria-label="Move scoresheet">
+        @for (row of scoresheetRows(); track row.number) {
+          <li>
+            <span class="move-num">{{ row.number }}.</span>
+            <span
+              class="ply"
+              [class.empty]="!row.white"
+              [class.current]="isCurrentPly(row.whitePly)"
+              [class.future]="isFuturePly(row.whitePly)"
+            >
+              {{ row.white ?? '...' }}
+            </span>
+            <span
+              class="ply"
+              [class.empty]="!row.black"
+              [class.current]="isCurrentPly(row.blackPly)"
+              [class.future]="isFuturePly(row.blackPly)"
+            >
+              {{ row.black }}
+            </span>
+          </li>
+        }
+      </ol>
+    }
   </section>
 
   <section class="palette" aria-label="Piece palette">
