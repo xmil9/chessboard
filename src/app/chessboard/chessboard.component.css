@@ -10,7 +10,7 @@
 }
 
 .workspace {
-  max-width: 720px;
+  max-width: 52rem;
   margin: 0 auto;
   padding: 1.5rem 1rem 2.5rem;
 }
@@ -73,11 +73,23 @@ button.secondary {
   background: transparent;
 }
 
+.play-area {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: start;
+}
+
+.board-column {
+  min-width: 0;
+}
+
 .board-area {
   display: grid;
   grid-template-columns: 1.5rem 1fr;
   gap: 0.35rem;
   align-items: stretch;
+  max-width: 576px;
 }
 
 .rank-labels {
@@ -174,7 +186,7 @@ button.secondary {
   grid-template-columns: 1.5rem repeat(8, 1fr);
   gap: 0.35rem;
   margin-top: 0.35rem;
-  max-width: calc(560px + 1.5rem + 0.35rem);
+  max-width: 576px;
   font-size: 0.85rem;
   color: #616e7c;
 }
@@ -185,11 +197,23 @@ button.secondary {
 
 .notation,
 .palette {
-  margin-top: 1.5rem;
   padding: 1rem 1.1rem;
   background: rgba(255, 255, 255, 0.72);
   border: 1px solid #d9e2ec;
   border-radius: 0.75rem;
+}
+
+.notation {
+  margin-top: 1.5rem;
+}
+
+.palette {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: max-content;
+  max-width: 11rem;
+  padding: 0.75rem 0.7rem 0.85rem;
 }
 
 .notation-header {
@@ -203,7 +227,8 @@ button.secondary {
 
 .notation h2,
 .palette h2 {
-  margin: 0 0 0.75rem;
+  margin: 0 0 0.6rem;
+  font-size: 1rem;
 }
 
 .side-toggle {
@@ -333,30 +358,30 @@ button.secondary {
 
 .palette-rows {
   display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
+  flex-direction: row;
+  gap: 0.45rem;
 }
 
 .palette-row {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.3rem;
 }
 
 .palette-label {
-  width: 3.5rem;
-  font-size: 0.9rem;
+  width: auto;
+  font-size: 0.75rem;
   color: #52606d;
 }
 
 .palette-piece {
-  width: 2.75rem;
-  height: 2.75rem;
+  width: 2.45rem;
+  height: 2.45rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.6rem;
+  font-size: 1.45rem;
   padding: 0;
 }
 
@@ -377,9 +402,47 @@ button.secondary {
 }
 
 .tip {
-  margin: 0.85rem 0 0;
-  font-size: 0.85rem;
+  margin: 0.7rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.3;
   color: #616e7c;
+}
+
+@media (max-width: 720px) {
+  .play-area {
+    grid-template-columns: 1fr;
+  }
+
+  .palette {
+    width: auto;
+    max-width: none;
+  }
+
+  .palette-rows {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .palette-row {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .palette-label {
+    width: 3.5rem;
+    font-size: 0.9rem;
+  }
+
+  .palette-piece {
+    width: 2.75rem;
+    height: 2.75rem;
+    font-size: 1.6rem;
+  }
+
+  .tip {
+    font-size: 0.85rem;
+  }
 }
 
 @media (max-width: 520px) {

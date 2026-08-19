@@ -39,66 +39,105 @@
     </div>
   </div>
 
-  <div class="board-area">
-    <div class="rank-labels" aria-hidden="true">
-      @for (rank of ranks; track rank) {
-        <span>{{ rank }}</span>
-      }
+  <div class="play-area">
+    <div class="board-column">
+      <div class="board-area">
+        <div class="rank-labels" aria-hidden="true">
+          @for (rank of ranks; track rank) {
+            <span>{{ rank }}</span>
+          }
+        </div>
+
+        <div
+          class="board"
+          role="grid"
+          aria-label="Chessboard"
+          [class.remove-mode]="mode() === 'remove'"
+          [class.add-mode]="mode() === 'add'"
+        >
+          @for (row of board(); track $index; let rowIndex = $index) {
+            <div class="rank" role="row">
+              @for (square of row; track $index; let colIndex = $index) {
+                <button
+                  type="button"
+                  class="square"
+                  role="gridcell"
+                  [class.light]="isLightSquare(rowIndex, colIndex)"
+                  [class.dark]="!isLightSquare(rowIndex, colIndex)"
+                  [class.selected]="isSelected(rowIndex, colIndex)"
+                  [attr.aria-label]="
+                    files[colIndex] +
+                    ranks[rowIndex] +
+                    (square
+                      ? ', ' + square.color + ' ' + square.type
+                      : ', empty')
+                  "
+                  (click)="onSquareClick(rowIndex, colIndex)"
+                  (contextmenu)="onSquareContextMenu($event, rowIndex, colIndex)"
+                  (dragover)="onDragOver($event)"
+                  (drop)="onDrop($event, rowIndex, colIndex)"
+                >
+                  @if (square) {
+                    <span
+                      class="piece"
+                      [class.white]="square.color === 'white'"
+                      [class.black]="square.color === 'black'"
+                      [attr.draggable]="mode() === 'move'"
+                      (dragstart)="onDragStart($event, rowIndex, colIndex)"
+                      (dragend)="onDragEnd()"
+                    >
+                      {{ symbolAt(rowIndex, colIndex) }}
+                    </span>
+                  }
+                </button>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="file-labels" aria-hidden="true">
+        <span class="spacer"></span>
+        @for (file of files; track file) {
+          <span>{{ file }}</span>
+        }
+      </div>
     </div>
 
-    <div
-      class="board"
-      role="grid"
-      aria-label="Chessboard"
-      [class.remove-mode]="mode() === 'remove'"
-      [class.add-mode]="mode() === 'add'"
-    >
-      @for (row of board(); track $index; let rowIndex = $index) {
-        <div class="rank" role="row">
-          @for (square of row; track $index; let colIndex = $index) {
+    <section class="palette" aria-label="Piece palette">
+      <h2>Pieces</h2>
+      <div class="palette-rows">
+        <div class="palette-row">
+          <span class="palette-label">White</span>
+          @for (type of pieceTypes; track type) {
             <button
               type="button"
-              class="square"
-              role="gridcell"
-              [class.light]="isLightSquare(rowIndex, colIndex)"
-              [class.dark]="!isLightSquare(rowIndex, colIndex)"
-              [class.selected]="isSelected(rowIndex, colIndex)"
-              [attr.aria-label]="
-                files[colIndex] +
-                ranks[rowIndex] +
-                (square
-                  ? ', ' + square.color + ' ' + square.type
-                  : ', empty')
-              "
-              (click)="onSquareClick(rowIndex, colIndex)"
-              (contextmenu)="onSquareContextMenu($event, rowIndex, colIndex)"
-              (dragover)="onDragOver($event)"
-              (drop)="onDrop($event, rowIndex, colIndex)"
+              class="palette-piece white"
+              [class.active]="isPaletteSelected(type, 'white')"
+              [attr.aria-label]="'Add white ' + type"
+              (click)="selectPalettePiece(type, 'white')"
             >
-              @if (square) {
-                <span
-                  class="piece"
-                  [class.white]="square.color === 'white'"
-                  [class.black]="square.color === 'black'"
-                  [attr.draggable]="mode() === 'move'"
-                  (dragstart)="onDragStart($event, rowIndex, colIndex)"
-                  (dragend)="onDragEnd()"
-                >
-                  {{ symbolAt(rowIndex, colIndex) }}
-                </span>
-              }
+              {{ paletteSymbol(type, 'white') }}
             </button>
           }
         </div>
-      }
-    </div>
-  </div>
-
-  <div class="file-labels" aria-hidden="true">
-    <span class="spacer"></span>
-    @for (file of files; track file) {
-      <span>{{ file }}</span>
-    }
+        <div class="palette-row">
+          <span class="palette-label">Black</span>
+          @for (type of pieceTypes; track type) {
+            <button
+              type="button"
+              class="palette-piece black"
+              [class.active]="isPaletteSelected(type, 'black')"
+              [attr.aria-label]="'Add black ' + type"
+              (click)="selectPalettePiece(type, 'black')"
+            >
+              {{ paletteSymbol(type, 'black') }}
+            </button>
+          }
+        </div>
+      </div>
+      <p class="tip">Right-click a square to remove a piece.</p>
+    </section>
   </div>
 
   <section class="notation" aria-label="Algebraic notation">
@@ -183,40 +222,5 @@
         }
       </ol>
     }
-  </section>
-
-  <section class="palette" aria-label="Piece palette">
-    <h2>Pieces</h2>
-    <div class="palette-rows">
-      <div class="palette-row">
-        <span class="palette-label">White</span>
-        @for (type of pieceTypes; track type) {
-          <button
-            type="button"
-            class="palette-piece white"
-            [class.active]="isPaletteSelected(type, 'white')"
-            [attr.aria-label]="'Add white ' + type"
-            (click)="selectPalettePiece(type, 'white')"
-          >
-            {{ paletteSymbol(type, 'white') }}
-          </button>
-        }
-      </div>
-      <div class="palette-row">
-        <span class="palette-label">Black</span>
-        @for (type of pieceTypes; track type) {
-          <button
-            type="button"
-            class="palette-piece black"
-            [class.active]="isPaletteSelected(type, 'black')"
-            [attr.aria-label]="'Add black ' + type"
-            (click)="selectPalettePiece(type, 'black')"
-          >
-            {{ paletteSymbol(type, 'black') }}
-          </button>
-        }
-      </div>
-    </div>
-    <p class="tip">Right-click any square to remove a piece.</p>
   </section>
 </div>
